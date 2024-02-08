@@ -40,11 +40,13 @@ class ComplexLReLU(nn.Module):
     def __init__(self):
         super(ComplexLReLU, self).__init__()
         self.proj = nn.Parameter(torch.randn(1, dtype=torch.cfloat))
+        self.radius_threshold = nn.Parameter(torch.Tensor([0.2]))
 
     def forward(self, x):
         # in leakyrelu-like fashion, transform values with negative real and complex parts
         # multiple all (<0,<0) values by self.proj
-        x[torch.logical_and(x.imag < 0, x.real < 0)] *= self.proj
+        # x[torch.logical_and(x.imag < 0, x.real < 0)] *= self.proj
+        x[abs(x) < self.radius_threshold] *= self.proj
         return x
 
 class ComplexRescale(nn.Module):
