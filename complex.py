@@ -194,7 +194,10 @@ for data in trainloader:
     # print(labels)
     break
 
-agent = ComplexAgent()
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print('using device:', device)
+
+agent = ComplexAgent().to(device)
 print(agent)
 
 criterion = nn.CrossEntropyLoss()
@@ -205,7 +208,7 @@ best_acc = 0
 for epoch in range(50):
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
-        inputs, labels = data
+        inputs, labels = data[0].to(device), data[1].to(device)
         optimizer.zero_grad()
         outputs = agent(inputs)
         loss = criterion(outputs, labels)
@@ -223,7 +226,7 @@ for epoch in range(50):
     total = 0
     with torch.no_grad():
         for data in testloader:
-            images, labels = data
+            images, labels = data[0].to(device), data[1].to(device)
             outputs = agent(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
